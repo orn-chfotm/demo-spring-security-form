@@ -1,8 +1,13 @@
 package com.inflearn.demospringsecurityform.form;
 
+import com.inflearn.demospringsecurityform.account.Account;
 import com.inflearn.demospringsecurityform.account.AccountRepository;
+import com.inflearn.demospringsecurityform.account.UserAccount;
+import com.inflearn.demospringsecurityform.book.BookRepository;
+import com.inflearn.demospringsecurityform.common.CurrentUser;
 import com.inflearn.demospringsecurityform.common.SecurityLogger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +25,15 @@ public class SampleController {
     @Autowired
     AccountRepository accountRepository;
 
+    @Autowired
+    BookRepository bookRepository;
+
     @GetMapping("/")
-    public String index(Model model, Principal principal){
-        if (principal == null) {
+    public String index(Model model, @CurrentUser Account account){
+        if (account == null) {
             model.addAttribute("message", "Hello, Spring  Security");
         } else {
-            model.addAttribute("message", "Hello, " + principal.getName());
+            model.addAttribute("message", "Hello, " + account.getUsername());
         }
         return "index";
     }
@@ -37,21 +45,22 @@ public class SampleController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model, Principal principal){
-        model.addAttribute("message", "Hello, " + principal.getName());
+    public String dashboard(Model model, @CurrentUser Account account){
+        model.addAttribute("message", "Hello, " + account.getUsername());
         sampleService.dashboard();
         return "dashboard";
     }
 
     @GetMapping("/admin")
-    public String admin(Model model, Principal principal){
-        model.addAttribute("message", "Hello Admin, " + principal.getName());
+    public String admin(Model model, @CurrentUser Account account){
+        model.addAttribute("message", "Hello Admin, " + account.getUsername());
         return "admin";
     }
 
     @GetMapping("/user")
-    public String user(Model model, Principal principal){
-        model.addAttribute("message", "Hello User, " + principal.getName());
+    public String user(Model model, @CurrentUser Account account){
+        model.addAttribute("message", "Hello User, " + account.getUsername());
+        model.addAttribute("books", bookRepository.findCurrenUserBooks());
         return "user";
     }
 
